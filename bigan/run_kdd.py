@@ -12,6 +12,7 @@ RANDOM_SEED = 13
 FREQ_PRINT = 20 # print frequency image tensorboard [20]
 
 
+
 def get_getter(ema):  # to update neural net with moving avg variables, suitable for ss learning cf Saliman
     def ema_getter(getter, name, *args, **kwargs):
         var = getter(name, *args, **kwargs)
@@ -41,7 +42,7 @@ def create_logdir(method, weight, rd):
     """ Directory to save training logs, weights, biases, etc."""
     return "bigan/train_logs/kdd/{}/{}/{}".format(weight, method, rd)
 
-def train_and_test(nb_epochs, weight, method, degree, random_seed):
+def train_and_test(nb_epochs, weight, method, degree, random_seed, nc):
     """ Runs the Bigan on the KDD dataset
 
     Note:
@@ -57,6 +58,8 @@ def train_and_test(nb_epochs, weight, method, degree, random_seed):
     """
     logger = logging.getLogger("BiGAN.train.kdd.{}".format(method))
 
+    data.set_nc(nc)
+    print("get_shape", data.get_shape_input()[1])
     # Placeholders
     input_pl = tf.placeholder(tf.float32, shape=data.get_shape_input(), name="input")
     is_training_pl = tf.placeholder(tf.bool, [], name='is_training_pl')
@@ -304,7 +307,7 @@ def train_and_test(nb_epochs, weight, method, degree, random_seed):
         ran_from = nr_batches_test * batch_size
         ran_to = (nr_batches_test + 1) * batch_size
         size = testx[ran_from:ran_to].shape[0]
-        fill = np.ones([batch_size - size, 121])
+        fill = np.ones([batch_size - size, data.get_shape_input()[1]])
 
         batch = np.concatenate([testx[ran_from:ran_to], fill], axis=0)
         feed_dict = {input_pl: batch,
@@ -333,12 +336,16 @@ def train_and_test(nb_epochs, weight, method, degree, random_seed):
                                                                   average='binary')
 
         print(
-            "Testing : Prec = %.4f | Rec = %.4f | F1 = %.4f "
-            % (precision, recall, f1))
+            "Testing(%d) : Prec = %.4f | Rec = %.4f | F1 = %.4f "
+            % (nc, precision, recall, f1))
+        content = "Testing(%d) : Prec = %.4f | Rec = %.4f | F1 = %.4f " % (nc, precision, recall, f1)
+        f1=open('./output.txt', 'a')
+        f1.write(content + "\r\n")
 
-def run(nb_epochs, weight, method, degree, label, random_seed=42):
+def run(nb_epochs, weight, method, degree, label, nc, random_seed=42):
     """ Runs the training process"""
+    print("Raj nc", nc)
     with tf.Graph().as_default():
         # Set the graph level seed
         tf.set_random_seed(random_seed)
-        train_and_test(nb_epochs, weight, method, degree, random_seed)
+        train_and_test(nb_epochs, weight, method, degree, random_seed, nc)

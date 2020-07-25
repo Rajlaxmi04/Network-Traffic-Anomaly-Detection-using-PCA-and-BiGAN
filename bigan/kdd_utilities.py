@@ -1,4 +1,5 @@
 import tensorflow as tf
+import data.kdd as data
 
 """KDD BiGAN architecture.
 
@@ -13,6 +14,7 @@ layer = 1
 latent_dim = 32
 dis_inter_layer_dim = 128
 init_kernel = tf.contrib.layers.xavier_initializer()
+#shape = 21
 
 def encoder(x_inp, is_training=False, getter=None, reuse=False):
     """ Encoder architecture in tensorflow
@@ -80,7 +82,7 @@ def decoder(z_inp, is_training=False, getter=None, reuse=False):
         name_net = 'layer_3'
         with tf.variable_scope(name_net):
             net = tf.layers.dense(net,
-                                  units=121,
+                                  units=data.get_shape_input()[1],
                                   kernel_initializer=init_kernel,
                                   name='fc')
 

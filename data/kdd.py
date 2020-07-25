@@ -3,8 +3,16 @@ import numpy as np
 import pandas as pd 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import minmax_scale
+from sklearn.preprocessing import MaxAbsScaler
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import RobustScaler
+from sklearn.preprocessing import Normalizer
+from sklearn.preprocessing import QuantileTransformer
+from sklearn.preprocessing import PowerTransformer
 
 logger = logging.getLogger(__name__)
+nc = 0
 
 def get_train(*args):
     """Get training dataset for KDD 10 percent"""
@@ -14,9 +22,13 @@ def get_test(*args):
     """Get testing dataset for KDD 10 percent"""
     return _get_adapted_dataset("test")
 
+def set_nc(n):
+    global nc
+    nc = n
+
 def get_shape_input():
     """Get shape of the dataset for KDD 10 percent"""
-    return (None, 121)
+    return (None, nc)
 
 def get_shape_label():
     """Get shape of the labels in KDD 10 percent"""
@@ -38,10 +50,9 @@ def _get_dataset():
     col_names = _col_names()
     df = pd.read_csv("data/kddcup.data_10_percent_corrected", header=None, names=col_names)
     text_l = ['protocol_type', 'service', 'flag', 'land', 'logged_in', 'is_host_login', 'is_guest_login']
-
+    old_df = df
     for name in text_l:
-        _encode_text_dummy(df, name)
-
+       _encode_text_dummy(df, name)
     labels = df['label'].copy()
     labels[labels != 'normal.'] = 0
     labels[labels == 'normal.'] = 1
@@ -64,12 +75,18 @@ def _get_dataset():
     scaler.transform(x_train)
     scaler.transform(x_test)
 
-    dataset = {}
-    dataset['x_train'] = x_train.astype(np.float32)
-    dataset['y_train'] = y_train.astype(np.float32)
-    dataset['x_test'] = x_test.astype(np.float32)
-    dataset['y_test'] = y_test.astype(np.float32)
+    from sklearn.decomposition import PCA
+    pca = PCA(n_components=get_shape_input()[1], random_state=42)
+    pca.fit(x_train)
+    x_train_pca = pca.transform(x_train)
+    x_test_pca = pca.transform(x_test)
 
+
+    dataset = {}
+    dataset['x_train'] = x_train_pca.astype(np.float32)
+    dataset['y_train'] = y_train.astype(np.float32)
+    dataset['x_test'] = x_test_pca.astype(np.float32)
+    dataset['y_test'] = y_test.astype(np.float32)
     return dataset
 
 def _get_adapted_dataset(split):
