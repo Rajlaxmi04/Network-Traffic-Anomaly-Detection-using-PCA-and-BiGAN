@@ -29,5 +29,5 @@ python3 main.py <bigan> <kdd> run --nb_epochs=<number_epochs> --label=<0, 1, 2, 
 ```
 To reproduce the results of the paper, please use w=0.1 (as in the original AnoGAN paper which gives a weight of 0.1 to the discriminator loss), d=1 for the feature matching loss.  
 
-Example command is shown below. Here nc is PCA n_components. Set to 24 for better results
-python main.py bigan kdd run --nb_epochs=10 --w=0.1 --m=cross-e --d=1 --nc=24
+Example command is shown below. Here nc is PCA n_components. Set to 28 for best performance results
+python main.py bigan kdd run --nb_epochs=10 --w=0.1 --m=cross-e --d=1 --nc=28
