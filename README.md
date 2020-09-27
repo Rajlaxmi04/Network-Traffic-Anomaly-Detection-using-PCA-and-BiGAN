@@ -31,3 +31,7 @@ To reproduce the results of the paper, please use w=0.1 (as in the original AnoG
 
 Example command is shown below. Here nc is PCA n_components. Set to 28 for best performance results
 python main.py bigan kdd run --nb_epochs=10 --w=0.1 --m=cross-e --d=1 --nc=28
+
+
+Courtesy: https://arxiv.org/pdf/1802.06222.pdf
+Original code was modified by applying PCA to the dataset
